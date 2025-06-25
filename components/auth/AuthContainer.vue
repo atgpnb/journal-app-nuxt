@@ -11,7 +11,7 @@ defineProps<Props>()
   <div class="space-y-6">
     <!-- Header -->
     <div class="text-center space-y-2">
-      <h2 class="text-3xl font-bold tracking-tight">{{ title }}</h2>
+      <h2 class="text-3xl text-foreground font-bold tracking-tight">{{ title }}</h2>
       <p v-if="subtitle" class="text-muted-foreground">{{ subtitle }}</p>
     </div>
 

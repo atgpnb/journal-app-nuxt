@@ -65,34 +65,24 @@ const onSubmit = handleSubmit((values) => {
       href: '/login'
     }"
   >
-    <form class="space-y-4" @submit="onSubmit">      <!-- Name fields -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <FormField v-slot="{ componentField }" name="firstName" :validate-on-blur="!isFieldDirty">
-          <FormItem v-auto-animate>
-            <FormLabel>First Name</FormLabel>
-            <FormControl>
-              <Input type="text" placeholder="John" v-bind="componentField" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField v-slot="{ componentField }" name="lastName" :validate-on-blur="!isFieldDirty">
-          <FormItem v-auto-animate>
-            <FormLabel>Last Name</FormLabel>
-            <FormControl>
-              <Input type="text" placeholder="Doe" v-bind="componentField" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-      </div>
+    <form class="space-y-4" @submit="onSubmit">
+      <!-- Name fields -->
+      <FormField v-slot="{ componentField }" name="name" :validate-on-blur="!isFieldDirty">
+        <FormItem v-auto-animate>
+          <FormLabel>Name</FormLabel>
+          <FormControl>
+            <Input type="text" placeholder="adi" v-bind="componentField" />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
 
       <!-- Email -->
       <FormField v-slot="{ componentField }" name="email" :validate-on-blur="!isFieldDirty">
         <FormItem v-auto-animate>
           <FormLabel>Email</FormLabel>
           <FormControl>
-            <Input type="email" placeholder="john@example.com" v-bind="componentField" />
+            <Input type="email" placeholder="adi@example.com" v-bind="componentField" />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -103,7 +93,7 @@ const onSubmit = handleSubmit((values) => {
         <FormItem v-auto-animate>
           <FormLabel>Username</FormLabel>
           <FormControl>
-            <Input type="text" placeholder="johndoe" v-bind="componentField" />
+            <Input type="text" placeholder="triginarsa" v-bind="componentField" />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -145,6 +135,12 @@ const onSubmit = handleSubmit((values) => {
         Create Account
       </Button>
     </form>
+    <div class="text-center text-sm text-muted-foreground mt-4">
+      Already have an account? 
+      <NuxtLink to="/login" class="text-primary hover:underline">
+        Sign in
+      </NuxtLink>
+    </div>
   </AuthContainer>
   </NuxtLayout>
 </template>

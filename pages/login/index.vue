@@ -87,6 +87,12 @@ const onSubmit = handleSubmit((values) => {
             Sign In
         </Button>
         </form>
+        <div class="text-center text-sm text-muted-foreground mt-4">
+            Don't have an account? 
+            <NuxtLink to="/signup" class="text-primary hover:underline">
+                Sign up
+            </NuxtLink>
+        </div>
     </AuthContainer>
     </NuxtLayout>
 </template>
