@@ -1,7 +1,13 @@
+<script setup lang="ts">
+import { Toaster } from '@/components/ui/sonner'
+import 'vue-sonner/style.css' // vue-sonner v2 requires this import
+</script>
+
+
 <template>
   <div>
     <NuxtRouteAnnouncer />
-    <h1 class="text-3xl font-bold mb-4 text-red-500">Welcome to My Nuxt App</h1>
-    <Button >Test</Button>
+    <NuxtPage />
   </div>
+  <Toaster />
 </template>
