@@ -24,8 +24,8 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 
 const data = {
   user: {
-    name: 'adi',
-    email: 'adi@example.com',
+    name: 'yoga',
+    email: 'yoga@example.com',
     avatar: 'https://avatar.vercel.sh/adi?rounded=60',
   },
   navMain: [
