@@ -19,8 +19,12 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxt/ui',
-    'shadcn-nuxt'
+    'shadcn-nuxt',
+    'nuxt-tiptap-editor'
   ],
+  tiptap: {
+    prefix: 'Tiptap', //prefix for Tiptap imports, composables not included
+  },
   shadcn: {
     /**
      * Prefix for all the imported component
