@@ -5,7 +5,6 @@ import { useForm } from 'vee-validate'
 import * as z from 'zod'
 
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   FormControl,
   FormField,
@@ -19,30 +18,65 @@ import AuthContainer from '@/components/auth/AuthContainer.vue'
 
 // Set layout for this page
 definePageMeta({
-  layout: 'auth'
+  layout: 'auth',
+  middleware: 'guest'
 })
 
+// Use auth composable
+const { login, isLoggingIn, loginError, isLoginSuccess } = useAuth()
+
 const formSchema = toTypedSchema(z.object({
-  username: z.string().min(2).max(50),
-    password: z.string().min(8).max(100).refine((val) => {
-      // Custom validation logic for password
-      const hasUpperCase = /[A-Z]/.test(val)
-      const hasLowerCase = /[a-z]/.test(val)
-      const hasNumber = /\d/.test(val)
-      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(val)
-      return hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar
-    }, {
-      message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
-    }),
+  username: z.string().min(2, 'Username/Email must be at least 2 characters').max(50),
+  password: z.string().min(8, 'Password must be at least 8 characters').max(100)
 }))
 
-const { isFieldDirty, handleSubmit } = useForm({
+const { isFieldDirty, handleSubmit, setFieldError } = useForm({
   validationSchema: formSchema,
+  initialValues: {
+    username: '',
+    password: ''
+  }
+})
+
+// Watch for login errors and display them
+watch(loginError, (error) => {
+  if (error) {
+    try {
+      const errorData = JSON.parse(error.message)
+      
+      if (errorData.errors) {
+        // Set field-specific errors
+        Object.entries(errorData.errors).forEach(([field, messages]) => {
+          if (Array.isArray(messages) && messages.length > 0) {
+            setFieldError(field, messages[0])
+          }
+        })
+      } else if (errorData.message) {
+        toast.error('Login Failed', {
+          description: errorData.message,
+        })
+      }
+    } catch {
+      toast.error('Login Failed', {
+        description: 'An unexpected error occurred. Please try again.',
+      })
+    }
+  }
+})
+
+// Watch for login success
+watch(isLoginSuccess, (success) => {
+  if (success) {
+    toast.success('Login successful!', {
+      description: 'Welcome back!',
+    })
+  }
 })
 
 const onSubmit = handleSubmit((values) => {
-  toast('Event has been created', {
-    description: `Hello, \n${JSON.stringify(values, null, 2)}`,
+  login({
+    username: values.username,
+    password: values.password,
   })
 })
 </script>
@@ -56,9 +90,9 @@ const onSubmit = handleSubmit((values) => {
         <form class="space-y-4" @submit="onSubmit">
         <FormField v-slot="{ componentField }" name="username" :validate-on-blur="!isFieldDirty">
             <FormItem v-auto-animate>
-            <FormLabel>Username</FormLabel>
+            <FormLabel>Username or Email</FormLabel>
             <FormControl>
-                <Input type="text" placeholder="triginarsa" v-bind="componentField" />
+                <Input type="text" placeholder="johndoe or john@example.com" v-bind="componentField" />
             </FormControl>
             <FormMessage />
             </FormItem>
@@ -67,24 +101,25 @@ const onSubmit = handleSubmit((values) => {
             <FormItem v-auto-animate>
             <FormLabel>Password</FormLabel>
             <FormControl>
-                <Input type="password" placeholder="" v-bind="componentField" />
+                <Input type="password" placeholder="********" v-bind="componentField" />
             </FormControl>
             <FormMessage />
             </FormItem>
         </FormField>
-            <!-- Remember me and Forgot password -->
+            
+        <!-- Remember me and Forgot password -->
         <div class="flex items-center justify-between text-sm">
-            <label class="flex items-center space-x-2">
-            <Checkbox />
-            <span>Remember me</span>
-            </label>
             <NuxtLink to="/forgot-password" class="text-primary hover:underline">
             Forgot password?
             </NuxtLink>
         </div>
         
-        <Button type="submit" class="w-full">
-            Sign In
+        <Button type="submit" class="w-full" :disabled="isLoggingIn">
+            <span v-if="isLoggingIn" class="flex items-center gap-2">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                Signing In...
+            </span>
+            <span v-else>Sign In</span>
         </Button>
         </form>
         <div class="text-center text-sm text-muted-foreground mt-4">

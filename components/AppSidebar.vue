@@ -22,12 +22,18 @@ const props = withDefaults(defineProps<SidebarProps>(), {
   variant: 'inset',
 })
 
+const { user } = useAuth()
+
 const data = {
-  user: {
-    name: 'adi',
-    email: 'adi@example.com',
-    avatar: 'https://avatar.vercel.sh/adi?rounded=60',
-  },
+  user: computed(() => user.value ? {
+    name: user.value.name,
+    email: user.value.email,
+    avatar: `https://avatar.vercel.sh/${user.value.username}?rounded=60`,
+  } : {
+    name: 'User',
+    email: 'user@example.com',
+    avatar: 'https://avatar.vercel.sh/user?rounded=60',
+  }),
   navMain: [
     {
       title: 'Add Journal',
@@ -66,7 +72,7 @@ const data = {
       <NavMain :items="data.navMain" />
     </SidebarContent>
     <SidebarFooter>
-      <NavUser :user="data.user" />
+      <NavUser :user="data.user.value" />
     </SidebarFooter>
   </Sidebar>
 </template>

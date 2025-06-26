@@ -7,6 +7,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
 
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
+    },
+  },
+
   vite: {
     plugins: [
       tailwindcss(),
@@ -19,8 +25,10 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxt/ui',
+    '@pinia/nuxt',
     'shadcn-nuxt',
-    'nuxt-tiptap-editor'
+    'nuxt-tiptap-editor',
+    '@hebilicious/vue-query-nuxt'
   ],
   tiptap: {
     prefix: 'Tiptap', //prefix for Tiptap imports, composables not included
