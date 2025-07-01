@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import editprofile from '@/pages/profile/editprofile.vue'
 
 const profile = {
   name: 'yoga',
@@ -22,27 +23,27 @@ definePageMeta({
 <template>
   <NuxtLayout name="dashboard">
     <div class="container mx-auto py-8">
-      <h1 class="text-2xl font-bold mb-6">Profil Saya</h1>
+      <h1 class="text-2xl font-bold mb-6">My Profile</h1>
 
       <div class="grid md:grid-cols-3 gap-8">
         <!-- Profile Photo Section -->
         <Card class="md:col-span-1">
           <CardHeader>
-            <CardTitle class="text-lg">Foto Profil</CardTitle>
+            <CardTitle class="text-lg">Photo Profile</CardTitle>
           </CardHeader>
           <CardContent class="flex flex-col items-center gap-4">
             <Avatar class="h-24 w-24">
               <AvatarImage :src="`https://avatar.vercel.sh/${profile.name}?rounded=60`" />
               <AvatarFallback class="text-2xl">{{ profile.avatar }}</AvatarFallback>
             </Avatar>
-            <Button variant="outline">Ubah Foto</Button>
+            <Button variant="outline">Change Photo</Button>
           </CardContent>
         </Card>
 
         <!-- User Information Section -->
         <Card class="md:col-span-2">
           <CardHeader>
-            <CardTitle class="text-lg">Informasi Pengguna</CardTitle>
+            <CardTitle class="text-lg">User Information</CardTitle>
           </CardHeader>
           <CardContent class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -51,7 +52,7 @@ definePageMeta({
                 <Input id="username" :model-value="profile.name" disabled />
               </div>
               <div class="space-y-2">
-                <Label for="name">Nama</Label>
+                <Label for="name">Name</Label>
                 <Input id="name" :model-value="profile.name" />
               </div>
             </div>
@@ -69,11 +70,11 @@ definePageMeta({
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-2">
-                <Label for="role">Hak Akses</Label>
+                <Label for="role">User Permission</Label>
                 <Input id="role" :model-value="profile.role" disabled />
               </div>
               <div class="space-y-2">
-                <Label for="department">Departemen</Label>
+                <Label for="department">Department</Label>
                 <Input id="department" :model-value="profile.department" disabled />
               </div>
             </div>
@@ -82,7 +83,7 @@ definePageMeta({
             <Button variant="outline">
               <NuxtLink to="/dashboard"> Back </NuxtLink>
             </Button>
-            <Button>Edit Profil</Button>
+            <Button> <NuxtLink to="/editprofile">Edit Profile</NuxtLink></Button>
           </CardFooter>
         </Card>
       </div>
