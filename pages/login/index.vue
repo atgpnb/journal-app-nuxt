@@ -42,13 +42,13 @@ const { isFieldDirty, handleSubmit, setFieldError } = useForm({
 watch(loginError, (error) => {
   if (error) {
     try {
-      const errorData = JSON.parse(error.message)
-      
+      const errorData = JSON.parse(error)
+
       if (errorData.errors) {
         // Set field-specific errors
         Object.entries(errorData.errors).forEach(([field, messages]) => {
           if (Array.isArray(messages) && messages.length > 0) {
-            setFieldError(field, messages[0])
+            setFieldError(field as 'username' | 'password', messages[0])
           }
         })
       } else if (errorData.message) {
@@ -82,52 +82,51 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-    <NuxtLayout :name="'auth'">
-    <AuthContainer 
-        title="Welcome back"
-        subtitle="Enter your credentials to access your account"
-    >
-        <form class="space-y-4" @submit="onSubmit">
+  <NuxtLayout :name="'auth'">
+    <AuthContainer title="Welcome back" subtitle="Enter your credentials to access your account">
+      <form class="space-y-4" @submit="onSubmit">
         <FormField v-slot="{ componentField }" name="username" :validate-on-blur="!isFieldDirty">
-            <FormItem v-auto-animate>
+          <FormItem v-auto-animate>
             <FormLabel>Username or Email</FormLabel>
             <FormControl>
-                <Input type="text" placeholder="johndoe or john@example.com" v-bind="componentField" />
+              <Input type="text" placeholder="johndoe or john@example.com" v-bind="componentField" />
             </FormControl>
             <FormMessage />
-            </FormItem>
+          </FormItem>
         </FormField>
         <FormField v-slot="{ componentField }" name="password" :validate-on-blur="!isFieldDirty">
-            <FormItem v-auto-animate>
+          <FormItem v-auto-animate>
             <FormLabel>Password</FormLabel>
             <FormControl>
-                <Input type="password" placeholder="********" v-bind="componentField" />
+              <Input type="password" placeholder="********" v-bind="componentField" />
             </FormControl>
             <FormMessage />
-            </FormItem>
+          </FormItem>
         </FormField>
-            
+
         <!-- Remember me and Forgot password -->
         <div class="flex items-center justify-between text-sm">
-            <NuxtLink to="/forgot-password" class="text-primary hover:underline">
+          <NuxtLink to="/forgot-password" class="text-primary hover:underline">
             Forgot password?
-            </NuxtLink>
+          </NuxtLink>
         </div>
-        
-        <Button type="submit" class="w-full" :disabled="isLoggingIn">
+        <nuxt-link to="/dashboard">
+          <Button type="submit" class="w-full" :disabled="isLoggingIn">
             <span v-if="isLoggingIn" class="flex items-center gap-2">
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                Signing In...
+              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+              Signing In...
             </span>
             <span v-else>Sign In</span>
-        </Button>
-        </form>
-        <div class="text-center text-sm text-muted-foreground mt-4">
-            Don't have an account? 
-            <NuxtLink to="/signup" class="text-primary hover:underline">
-                Sign up
-            </NuxtLink>
-        </div>
+          </Button>
+        </nuxt-link>
+
+      </form>
+      <div class="text-center text-sm text-muted-foreground mt-4">
+        Don't have an account?
+        <NuxtLink to="/signup" class="text-primary hover:underline">
+          Sign up
+        </NuxtLink>
+      </div>
     </AuthContainer>
-    </NuxtLayout>
+  </NuxtLayout>
 </template>
