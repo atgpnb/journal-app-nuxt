@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useApiClient } from '~/lib/api'
 import { AUTH_CONFIG } from '~/constants/auth'
 import { useAuthStore } from '~/stores/auth'
+import { forceRedirectToDashboard } from '~/utils/navigation'
 import type { 
   SignupRequest, 
   LoginRequest, 
@@ -59,19 +60,16 @@ export const useAuth = () => {
 
   // Store auth data in both store and cookies
   const setAuthData = (token: string, user: User) => {
-    const authTokenCookie = useCookie<string | null>(AUTH_CONFIG.STORAGE_KEYS.TOKEN, {
+    const cookieOptions = {
       default: () => null,
       maxAge: AUTH_CONFIG.COOKIE_MAX_AGE,
       sameSite: AUTH_CONFIG.COOKIE_SAME_SITE,
-      secure: AUTH_CONFIG.COOKIE_SECURE
-    })
+      secure: AUTH_CONFIG.COOKIE_SECURE,
+      httpOnly: false // Allow client-side access for better compatibility
+    }
     
-    const authUserCookie = useCookie<string | null>(AUTH_CONFIG.STORAGE_KEYS.USER, {
-      default: () => null,
-      maxAge: AUTH_CONFIG.COOKIE_MAX_AGE,
-      sameSite: AUTH_CONFIG.COOKIE_SAME_SITE,
-      secure: AUTH_CONFIG.COOKIE_SECURE
-    })
+    const authTokenCookie = useCookie<string | null>(AUTH_CONFIG.STORAGE_KEYS.TOKEN, cookieOptions)
+    const authUserCookie = useCookie<string | null>(AUTH_CONFIG.STORAGE_KEYS.USER, cookieOptions)
     
     // Set cookies (works on both server and client)
     authTokenCookie.value = token
@@ -140,27 +138,60 @@ export const useAuth = () => {
   // Signup mutation
   const signupMutation = useMutation({
     mutationFn: (data: SignupRequest) => apiClient.signup(data),
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       const { token, user } = response.data
       setAuthData(token, user)
       
-      // Navigate to dashboard after successful signup
-      navigateTo(AUTH_CONFIG.ROUTES.DASHBOARD)
+      // Wait a bit to ensure cookies are set properly
+      await nextTick()
+      
+      // Try multiple navigation approaches for production reliability
+      try {
+        await navigateTo(AUTH_CONFIG.ROUTES.DASHBOARD, { replace: true })
+      } catch (error) {
+        console.warn('Standard navigation failed, using fallback:', error)
+        forceRedirectToDashboard()
+      }
     },
     onError: (error: Error) => {
       console.error('Signup error:', handleAuthError(error))
     }
   })
 
-  // Login mutation
+  // Login mutation  
   const loginMutation = useMutation({
     mutationFn: (data: LoginRequest) => apiClient.login(data),
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       const { token, user } = response.data
+      console.log('Login successful, setting auth data...')
+      console.log('Auth data received:', { hasToken: !!token, hasUser: !!user })
+      
       setAuthData(token, user)
       
-      // Navigate to dashboard after successful login
-      navigateTo(AUTH_CONFIG.ROUTES.DASHBOARD)
+      // Wait a bit to ensure cookies are set properly
+      await nextTick()
+      
+      // Verify cookies are set
+      const tokenCookie = useCookie(AUTH_CONFIG.STORAGE_KEYS.TOKEN)
+      const userCookie = useCookie(AUTH_CONFIG.STORAGE_KEYS.USER)
+      
+      console.log('Cookie status after login:', {
+        tokenSet: !!tokenCookie.value,
+        userSet: !!userCookie.value,
+        cookieSecure: AUTH_CONFIG.COOKIE_SECURE,
+        environment: process.env.NODE_ENV,
+        redirectTo: AUTH_CONFIG.ROUTES.DASHBOARD
+      })
+      
+      // Try multiple navigation approaches for production reliability
+      try {
+        console.log('Attempting navigation to dashboard...')
+        await navigateTo(AUTH_CONFIG.ROUTES.DASHBOARD, { replace: true })
+        console.log('Navigation successful')
+      } catch (error) {
+        console.warn('Standard navigation failed, using fallback:', error)
+        forceRedirectToDashboard()
+      }
     },
     onError: (error: Error) => {
       console.error('Login error:', handleAuthError(error))

@@ -11,7 +11,8 @@ export const AUTH_CONFIG = {
   // Cookie settings
   COOKIE_MAX_AGE: 60 * 60 * 24 * 7, // 7 days
   COOKIE_SAME_SITE: 'lax' as const,
-  COOKIE_SECURE: process.env.NODE_ENV === 'production',
+  // Allow HTTP cookies since production deployment will use HTTP
+  COOKIE_SECURE: false,
   
   // LocalStorage keys
   STORAGE_KEYS: {

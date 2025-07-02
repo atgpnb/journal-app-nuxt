@@ -12,8 +12,16 @@ export default defineNuxtRouteMiddleware((_to, _from) => {
   const authToken = useCookie(AUTH_CONFIG.STORAGE_KEYS.TOKEN)
   const authUser = useCookie(AUTH_CONFIG.STORAGE_KEYS.USER)
   
+  console.log('Auth middleware check:', {
+    hasToken: !!authToken.value,
+    hasUser: !!authUser.value,
+    route: _to.path,
+    isClient: import.meta.client
+  })
+  
   // If no token or user data, redirect to login
   if (!authToken.value || !authUser.value) {
+    console.log('Auth middleware: redirecting to login - missing token or user')
     return navigateTo(AUTH_CONFIG.ROUTES.LOGIN)
   }
   
