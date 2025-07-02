@@ -1,226 +1,15 @@
-<template>
-  <div class="container mx-auto max-w-4xl p-6">
-    <div class="space-y-6">
-      <!-- Page Header -->
-      <div class="space-y-2">
-        <h1 class="text-3xl font-bold tracking-tight">Profile Settings</h1>
-        <p class="text-muted-foreground">
-          Manage your account settings and preferences.
-        </p>
-      </div>
-
-      <Separator />
-
-      <div class="grid gap-6 md:grid-cols-2">
-        <!-- Profile Information -->
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
-            <CardDescription>
-              Update your personal information and email address.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form @submit="onProfileSubmit" class="space-y-4" v-auto-animate>
-              <FormField v-slot="{ componentField }" name="name">
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter your full name"
-                      v-bind="componentField"
-                      :disabled="isUpdatingProfile"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-
-              <FormField v-slot="{ componentField }" name="username">
-                <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter your username"
-                      v-bind="componentField"
-                      :disabled="isUpdatingProfile"
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    This is your unique identifier. It can only contain letters, numbers, hyphens, and underscores.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-
-              <FormField v-slot="{ componentField }" name="email">
-                <FormItem>
-                  <FormLabel>Email Address</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Enter your email"
-                      v-bind="componentField"
-                      :disabled="isUpdatingProfile"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-
-              <Button type="submit" :disabled="isUpdatingProfile">
-                <Icon v-if="isUpdatingProfile" name="lucide:loader-2" class="mr-2 h-4 w-4 animate-spin" />
-                {{ isUpdatingProfile ? 'Updating...' : 'Update Profile' }}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <!-- Password Change -->
-        <Card>
-          <CardHeader>
-            <CardTitle>Change Password</CardTitle>
-            <CardDescription>
-              Update your password to keep your account secure.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form @submit="onPasswordSubmit" class="space-y-4" v-auto-animate>
-              <FormField v-slot="{ componentField }" name="current_password">
-                <FormItem>
-                  <FormLabel>Current Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Enter current password"
-                      v-bind="componentField"
-                      :disabled="isChangingPassword"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-
-              <FormField v-slot="{ componentField }" name="password">
-                <FormItem>
-                  <FormLabel>New Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Enter new password"
-                      v-bind="componentField"
-                      :disabled="isChangingPassword"
-                      @input="onPasswordInput"
-                    />
-                  </FormControl>
-                  <FormDescription v-if="passwordStrength.feedback.length > 0">
-                    <div class="space-y-1">
-                      <div class="flex items-center space-x-2">
-                        <div class="flex space-x-1">
-                          <div 
-                            v-for="i in 4" 
-                            :key="i"
-                            class="h-1 w-6 rounded"
-                            :class="{
-                              'bg-red-500': passwordStrength.level === 'weak' && i <= 1,
-                              'bg-yellow-500': passwordStrength.level === 'fair' && i <= 2,
-                              'bg-blue-500': passwordStrength.level === 'good' && i <= 3,
-                              'bg-green-500': passwordStrength.level === 'strong' && i <= 4,
-                              'bg-gray-200': (
-                                (passwordStrength.level === 'weak' && i > 1) ||
-                                (passwordStrength.level === 'fair' && i > 2) ||
-                                (passwordStrength.level === 'good' && i > 3)
-                              )
-                            }"
-                          />
-                        </div>
-                        <span class="text-xs font-medium capitalize">{{ passwordStrength.level }}</span>
-                      </div>
-                      <div class="text-xs text-muted-foreground">
-                        <ul class="list-disc list-inside space-y-1">
-                          <li v-for="feedback in passwordStrength.feedback" :key="feedback">
-                            {{ feedback }}
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-
-              <FormField v-slot="{ componentField }" name="password_confirmation">
-                <FormItem>
-                  <FormLabel>Confirm New Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Confirm new password"
-                      v-bind="componentField"
-                      :disabled="isChangingPassword"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-
-              <Button type="submit" :disabled="isChangingPassword">
-                <Icon v-if="isChangingPassword" name="lucide:loader-2" class="mr-2 h-4 w-4 animate-spin" />
-                {{ isChangingPassword ? 'Changing...' : 'Change Password' }}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-
-      <!-- Account Information -->
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Information</CardTitle>
-          <CardDescription>
-            Your account details and status.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div class="grid gap-4 md:grid-cols-2">
-            <div class="space-y-2">
-              <Label class="text-sm font-medium">Account ID</Label>
-              <p class="text-sm text-muted-foreground">#{{ user?.id }}</p>
-            </div>
-            <div class="space-y-2">
-              <Label class="text-sm font-medium">Member Since</Label>
-              <p class="text-sm text-muted-foreground">
-                {{ formatDate(user?.created_at) }}
-              </p>
-            </div>
-            <div class="space-y-2">
-              <Label class="text-sm font-medium">Email Status</Label>
-              <div class="flex items-center space-x-2">
-                <Badge v-if="user?.email_verified_at" variant="success">
-                  <Icon name="lucide:check" class="mr-1 h-3 w-3" />
-                  Verified
-                </Badge>
-                <Badge v-else variant="destructive">
-                  <Icon name="lucide:x" class="mr-1 h-3 w-3" />
-                  Not Verified
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
-
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   FormControl,
   FormDescription,
@@ -229,10 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
-import { Badge } from '@/components/ui/badge'
 import { AUTH_CONFIG, validateEmail, validateUsername, getPasswordStrength } from '@/constants/auth'
 import { toast } from 'vue-sonner'
 
@@ -243,7 +28,7 @@ definePageMeta({
 })
 
 // Use auth composable
-const { 
+const {
   user,
   updateProfile,
   changePassword,
@@ -258,21 +43,21 @@ const {
 // Profile form validation schema
 const profileSchema = toTypedSchema(z.object({
   name: z.string()
-    .min(AUTH_CONFIG.VALIDATION.NAME.MIN_LENGTH, 
-         `Name must be at least ${AUTH_CONFIG.VALIDATION.NAME.MIN_LENGTH} characters`)
-    .max(AUTH_CONFIG.VALIDATION.NAME.MAX_LENGTH, 
-         `Name must not exceed ${AUTH_CONFIG.VALIDATION.NAME.MAX_LENGTH} characters`),
+    .min(AUTH_CONFIG.VALIDATION.NAME.MIN_LENGTH,
+      `Name must be at least ${AUTH_CONFIG.VALIDATION.NAME.MIN_LENGTH} characters`)
+    .max(AUTH_CONFIG.VALIDATION.NAME.MAX_LENGTH,
+      `Name must not exceed ${AUTH_CONFIG.VALIDATION.NAME.MAX_LENGTH} characters`),
   username: z.string()
     .min(AUTH_CONFIG.VALIDATION.USERNAME.MIN_LENGTH,
-         `Username must be at least ${AUTH_CONFIG.VALIDATION.USERNAME.MIN_LENGTH} characters`)
+      `Username must be at least ${AUTH_CONFIG.VALIDATION.USERNAME.MIN_LENGTH} characters`)
     .max(AUTH_CONFIG.VALIDATION.USERNAME.MAX_LENGTH,
-         `Username must not exceed ${AUTH_CONFIG.VALIDATION.USERNAME.MAX_LENGTH} characters`)
-    .regex(AUTH_CONFIG.VALIDATION.USERNAME.PATTERN, 
-           AUTH_CONFIG.MESSAGES.USERNAME_INVALID),
+      `Username must not exceed ${AUTH_CONFIG.VALIDATION.USERNAME.MAX_LENGTH} characters`)
+    .regex(AUTH_CONFIG.VALIDATION.USERNAME.PATTERN,
+      AUTH_CONFIG.MESSAGES.USERNAME_INVALID),
   email: z.string()
     .email(AUTH_CONFIG.MESSAGES.EMAIL_INVALID)
     .max(AUTH_CONFIG.VALIDATION.EMAIL.MAX_LENGTH,
-         `Email must not exceed ${AUTH_CONFIG.VALIDATION.EMAIL.MAX_LENGTH} characters`)
+      `Email must not exceed ${AUTH_CONFIG.VALIDATION.EMAIL.MAX_LENGTH} characters`)
 }))
 
 // Password form validation schema
@@ -280,17 +65,17 @@ const passwordSchema = toTypedSchema(z.object({
   current_password: z.string().min(1, 'Current password is required'),
   password: z.string()
     .min(AUTH_CONFIG.PASSWORD_REQUIREMENTS.MIN_LENGTH,
-         `Password must be at least ${AUTH_CONFIG.PASSWORD_REQUIREMENTS.MIN_LENGTH} characters`)
+      `Password must be at least ${AUTH_CONFIG.PASSWORD_REQUIREMENTS.MIN_LENGTH} characters`)
     .max(AUTH_CONFIG.PASSWORD_REQUIREMENTS.MAX_LENGTH,
-         `Password must not exceed ${AUTH_CONFIG.PASSWORD_REQUIREMENTS.MAX_LENGTH} characters`)
-    .regex(AUTH_CONFIG.PASSWORD_REQUIREMENTS.PATTERNS.UPPERCASE, 
-           'Password must contain at least one uppercase letter')
+      `Password must not exceed ${AUTH_CONFIG.PASSWORD_REQUIREMENTS.MAX_LENGTH} characters`)
+    .regex(AUTH_CONFIG.PASSWORD_REQUIREMENTS.PATTERNS.UPPERCASE,
+      'Password must contain at least one uppercase letter')
     .regex(AUTH_CONFIG.PASSWORD_REQUIREMENTS.PATTERNS.LOWERCASE,
-           'Password must contain at least one lowercase letter')
+      'Password must contain at least one lowercase letter')
     .regex(AUTH_CONFIG.PASSWORD_REQUIREMENTS.PATTERNS.NUMBER,
-           'Password must contain at least one number')
+      'Password must contain at least one number')
     .regex(AUTH_CONFIG.PASSWORD_REQUIREMENTS.PATTERNS.SPECIAL_CHAR,
-           'Password must contain at least one special character (@$!%*?&)'),
+      'Password must contain at least one special character (@$!%*?&)'),
   password_confirmation: z.string()
 }).refine((data) => data.password === data.password_confirmation, {
   message: AUTH_CONFIG.MESSAGES.PASSWORD_MISMATCH,
@@ -308,8 +93,8 @@ const { handleSubmit: handleProfileSubmit, setFieldError: setProfileError } = us
 })
 
 // Password form
-const { 
-  handleSubmit: handlePasswordSubmit, 
+const {
+  handleSubmit: handlePasswordSubmit,
   setFieldError: setPasswordError,
   resetForm: resetPasswordForm
 } = useForm({
@@ -322,7 +107,11 @@ const {
 })
 
 // Password strength tracking
-const passwordStrength = ref({ score: 0, level: 'weak' as const, feedback: [] as string[] })
+const passwordStrength = ref<{ score: number; level: 'weak' | 'fair' | 'good' | 'strong'; feedback: string[] }>({
+  score: 0,
+  level: 'weak',
+  feedback: []
+})
 
 const onPasswordInput = (event: Event) => {
   const password = (event.target as HTMLInputElement).value
@@ -356,7 +145,7 @@ watch(profileError, (error) => {
       if (errorData.errors) {
         Object.entries(errorData.errors).forEach(([field, messages]) => {
           if (Array.isArray(messages) && messages.length > 0) {
-            setProfileError(field, messages[0])
+            setProfileError(field as 'name' | 'username' | 'email', messages[0])
           }
         })
       } else {
@@ -380,7 +169,7 @@ watch(passwordError, (error) => {
       if (errorData.errors) {
         Object.entries(errorData.errors).forEach(([field, messages]) => {
           if (Array.isArray(messages) && messages.length > 0) {
-            setPasswordError(field, messages[0])
+            setPasswordError(field as 'current_password' | 'password' | 'password_confirmation', messages[0])
           }
         })
       } else {
@@ -433,4 +222,100 @@ const formatDate = (dateString?: string) => {
     day: 'numeric'
   })
 }
+
+// For the old profile card demo (if still needed)
+const profile = {
+  name: 'yoga',
+  email: 'yoga@example.com',
+  whatsapp: '',
+  role: 'Admin',
+  department: 'UPA-KK',
+  avatar: 'A'
+}
+
+
+function useAuth(): { user: any; updateProfile: any; changePassword: any; isUpdatingProfile: any; isChangingPassword: any; profileError: any; passwordError: any; isProfileSuccess: any; isPasswordSuccess: any } {
+  throw new Error('Function not implemented.')
+}
 </script>
+
+<template>
+  <NuxtLayout name="dashboard">
+    <div class="container mx-auto py-8">
+      <h1 class="text-2xl font-bold mb-6">My Profile</h1>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Profile Photo Section -->
+        <Card class="md:col-span-1">
+          <CardHeader>
+            <CardTitle class="text-lg">Photo Profile</CardTitle>
+          </CardHeader>
+          <CardContent class="flex flex-col items-center gap-4">
+            <Avatar class="h-24 w-24">
+              <AvatarImage :src="`https://avatar.vercel.sh/${profile.name}?rounded=60`" />
+              <AvatarFallback class="text-2xl">{{ profile.avatar }}</AvatarFallback>
+            </Avatar>
+            <Button variant="outline">Change Photo</Button>
+          </CardContent>
+        </Card>
+
+        <!-- User Information Section -->
+        <Card class="md:col-span-2">
+          <CardHeader>
+            <CardTitle class="text-lg">User Information</CardTitle>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <Label for="username">Username</Label>
+                <Input id="username" :model-value="profile.name" disabled />
+              </div>
+              <div class="space-y-2">
+                <Label for="name">Name</Label>
+                <Input id="name" :model-value="profile.name" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <Label for="email">Email</Label>
+                <Input id="email" type="email" :model-value="profile.email" />
+              </div>
+              <div class="space-y-2">
+                <Label for="whatsapp">No. WhatsApp</Label>
+                <Input id="whatsapp" :model-value="profile.whatsapp" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <Label for="role">User Permission</Label>
+                <Input id="role" :model-value="profile.role" disabled />
+              </div>
+              <div class="space-y-2">
+                <Label for="department">Department</Label>
+                <Input id="department" :model-value="profile.department" disabled />
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter class="flex justify-end flex gap-4">
+            <Button variant="outline">
+              <NuxtLink to="/dashboard"> Back </NuxtLink>
+            </Button>
+            <Button>
+              <NuxtLink to="/editprofile">Edit Profile</NuxtLink>
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+    <div class="container mx-auto max-w-4xl p-6">
+      <div class="space-y-6">
+        <!-- Page Header -->
+        <div class="space-y-2">
+          
+        </div>
+      </div>
+    </div>
+  </NuxtLayout>
+</template>
